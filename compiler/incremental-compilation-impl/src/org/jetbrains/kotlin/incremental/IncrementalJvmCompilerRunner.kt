@@ -85,7 +85,7 @@ fun makeIncrementally(
 
     withIC {
         val compiler =
-            if (args.useFir)
+            if (args.useFir && args.useFirIC && args.useFirLT /* TODO: move LT check into runner */ )
                 IncrementalFirJvmCompilerRunner(
                     cachesDir, buildReporter, buildHistoryFile, emptyList(), EmptyModulesApiHistory, kotlinExtensions, ClasspathSnapshotDisabled
                 )
