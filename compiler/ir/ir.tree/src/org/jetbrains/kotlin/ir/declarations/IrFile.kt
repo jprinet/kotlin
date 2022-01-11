@@ -24,6 +24,8 @@ import org.jetbrains.kotlin.ir.symbols.IrExternalPackageFragmentSymbol
 import org.jetbrains.kotlin.ir.symbols.IrFileSymbol
 import org.jetbrains.kotlin.ir.symbols.IrPackageFragmentSymbol
 import org.jetbrains.kotlin.ir.visitors.IrElementTransformer
+import org.jetbrains.kotlin.ir.visitors.IrElementVisitor
+import org.jetbrains.kotlin.ir.visitors.IrThinVisitor
 import org.jetbrains.kotlin.name.FqName
 import org.jetbrains.kotlin.serialization.deserialization.descriptors.DeserializedContainerSource
 import java.io.File
@@ -39,6 +41,26 @@ abstract class IrPackageFragment : IrElementBase(), IrDeclarationContainer, IrSy
 abstract class IrExternalPackageFragment : IrPackageFragment() {
     abstract override val symbol: IrExternalPackageFragmentSymbol
     abstract val containerSource: DeserializedContainerSource?
+
+    override fun <R, D> accept(visitor: IrElementVisitor<R, D>, data: D): R =
+        visitor.visitExternalPackageFragment(this, data)
+
+    override fun <R, D> accept(visitor: IrThinVisitor<R, D>, data: D): R =
+        visitor.visitExternalPackageFragment(this, data)
+
+    override fun <D> acceptChildren(visitor: IrElementVisitor<Unit, D>, data: D) {
+        declarations.forEach { it.accept(visitor, data) }
+    }
+
+    override fun <D> acceptChildren(visitor: IrThinVisitor<Unit, D>, data: D) {
+        declarations.forEach { it.accept(visitor, data) }
+    }
+
+    override fun <D> transformChildren(transformer: IrElementTransformer<D>, data: D) {
+        declarations.forEachIndexed { i, irDeclaration ->
+            declarations[i] = irDeclaration.transform(transformer, data) as IrDeclaration
+        }
+    }
 }
 
 abstract class IrFile : IrPackageFragment(), IrMutableAnnotationContainer, IrMetadataSourceOwner {
@@ -48,8 +70,28 @@ abstract class IrFile : IrPackageFragment(), IrMutableAnnotationContainer, IrMet
 
     abstract val fileEntry: IrFileEntry
 
+    override fun <R, D> accept(visitor: IrElementVisitor<R, D>, data: D): R =
+        visitor.visitFile(this, data)
+
+    override fun <R, D> accept(visitor: IrThinVisitor<R, D>, data: D): R =
+        visitor.visitFile(this, data)
+
+    override fun <D> acceptChildren(visitor: IrElementVisitor<Unit, D>, data: D) {
+        declarations.forEach { it.accept(visitor, data) }
+    }
+
+    override fun <D> acceptChildren(visitor: IrThinVisitor<Unit, D>, data: D) {
+        declarations.forEach { it.accept(visitor, data) }
+    }
+
     override fun <D> transform(transformer: IrElementTransformer<D>, data: D): IrFile =
         accept(transformer, data) as IrFile
+
+    override fun <D> transformChildren(transformer: IrElementTransformer<D>, data: D) {
+        declarations.forEachIndexed { i, irDeclaration ->
+            declarations[i] = irDeclaration.transform(transformer, data) as IrDeclaration
+        }
+    }
 }
 
 val IrFile.path: String get() = fileEntry.name

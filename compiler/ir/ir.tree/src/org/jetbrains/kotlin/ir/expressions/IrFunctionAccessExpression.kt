@@ -9,6 +9,7 @@ import org.jetbrains.kotlin.ir.declarations.IrValueParameter
 import org.jetbrains.kotlin.ir.symbols.IrFunctionSymbol
 import org.jetbrains.kotlin.ir.visitors.IrElementTransformer
 import org.jetbrains.kotlin.ir.visitors.IrElementVisitor
+import org.jetbrains.kotlin.ir.visitors.IrThinVisitor
 
 abstract class IrFunctionAccessExpression(
     typeArgumentsCount: Int,
@@ -40,6 +41,11 @@ abstract class IrFunctionAccessExpression(
     }
 
     override fun <D> acceptChildren(visitor: IrElementVisitor<Unit, D>, data: D) {
+        super.acceptChildren(visitor, data)
+        argumentsByParameterIndex.forEach { it?.accept(visitor, data) }
+    }
+
+    override fun <D> acceptChildren(visitor: IrThinVisitor<Unit, D>, data: D) {
         super.acceptChildren(visitor, data)
         argumentsByParameterIndex.forEach { it?.accept(visitor, data) }
     }

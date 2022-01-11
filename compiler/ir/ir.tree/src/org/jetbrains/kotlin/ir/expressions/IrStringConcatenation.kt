@@ -16,8 +16,25 @@
 
 package org.jetbrains.kotlin.ir.expressions
 
+import org.jetbrains.kotlin.ir.visitors.IrElementVisitor
+import org.jetbrains.kotlin.ir.visitors.IrThinVisitor
+
 abstract class IrStringConcatenation : IrExpression() {
     abstract val arguments: List<IrExpression>
 
     abstract fun addArgument(argument: IrExpression)
+
+    override fun <R, D> accept(visitor: IrElementVisitor<R, D>, data: D): R =
+        visitor.visitStringConcatenation(this, data)
+
+    override fun <R, D> accept(visitor: IrThinVisitor<R, D>, data: D): R =
+        visitor.visitStringConcatenation(this, data)
+
+    override fun <D> acceptChildren(visitor: IrElementVisitor<Unit, D>, data: D) {
+        arguments.forEach { it.accept(visitor, data) }
+    }
+
+    override fun <D> acceptChildren(visitor: IrThinVisitor<Unit, D>, data: D) {
+        arguments.forEach { it.accept(visitor, data) }
+    }
 }

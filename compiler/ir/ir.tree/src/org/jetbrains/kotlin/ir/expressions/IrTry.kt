@@ -19,6 +19,8 @@ package org.jetbrains.kotlin.ir.expressions
 import org.jetbrains.kotlin.ir.IrElementBase
 import org.jetbrains.kotlin.ir.declarations.IrVariable
 import org.jetbrains.kotlin.ir.visitors.IrElementTransformer
+import org.jetbrains.kotlin.ir.visitors.IrElementVisitor
+import org.jetbrains.kotlin.ir.visitors.IrThinVisitor
 
 abstract class IrTry : IrExpression() {
     abstract var tryResult: IrExpression
@@ -26,11 +28,45 @@ abstract class IrTry : IrExpression() {
     abstract val catches: List<IrCatch>
 
     abstract var finallyExpression: IrExpression?
+
+    override fun <R, D> accept(visitor: IrElementVisitor<R, D>, data: D): R =
+        visitor.visitTry(this, data)
+
+    override fun <R, D> accept(visitor: IrThinVisitor<R, D>, data: D): R =
+        visitor.visitTry(this, data)
+
+    override fun <D> acceptChildren(visitor: IrElementVisitor<Unit, D>, data: D) {
+        tryResult.accept(visitor, data)
+        catches.forEach { it.accept(visitor, data) }
+        finallyExpression?.accept(visitor, data)
+    }
+
+    override fun <D> acceptChildren(visitor: IrThinVisitor<Unit, D>, data: D) {
+        tryResult.accept(visitor, data)
+        catches.forEach { it.accept(visitor, data) }
+        finallyExpression?.accept(visitor, data)
+    }
 }
 
 abstract class IrCatch : IrElementBase() {
     abstract var catchParameter: IrVariable
     abstract var result: IrExpression
+
+    override fun <R, D> accept(visitor: IrElementVisitor<R, D>, data: D): R =
+        visitor.visitCatch(this, data)
+
+    override fun <R, D> accept(visitor: IrThinVisitor<R, D>, data: D): R =
+        visitor.visitCatch(this, data)
+
+    override fun <D> acceptChildren(visitor: IrElementVisitor<Unit, D>, data: D) {
+        catchParameter.accept(visitor, data)
+        result.accept(visitor, data)
+    }
+
+    override fun <D> acceptChildren(visitor: IrThinVisitor<Unit, D>, data: D) {
+        catchParameter.accept(visitor, data)
+        result.accept(visitor, data)
+    }
 
     override fun <D> transform(transformer: IrElementTransformer<D>, data: D): IrCatch =
         super.transform(transformer, data) as IrCatch

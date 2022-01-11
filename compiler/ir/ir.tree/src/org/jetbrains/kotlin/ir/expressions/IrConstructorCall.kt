@@ -7,6 +7,8 @@ package org.jetbrains.kotlin.ir.expressions
 
 import org.jetbrains.kotlin.ir.symbols.IrConstructorSymbol
 import org.jetbrains.kotlin.ir.types.IrType
+import org.jetbrains.kotlin.ir.visitors.IrElementVisitor
+import org.jetbrains.kotlin.ir.visitors.IrThinVisitor
 
 abstract class IrConstructorCall(
     typeArgumentsCount: Int,
@@ -15,6 +17,12 @@ abstract class IrConstructorCall(
     abstract override val symbol: IrConstructorSymbol
 
     abstract val constructorTypeArgumentsCount: Int
+
+    override fun <R, D> accept(visitor: IrElementVisitor<R, D>, data: D): R =
+        visitor.visitConstructorCall(this, data)
+
+    override fun <R, D> accept(visitor: IrThinVisitor<R, D>, data: D): R =
+        visitor.visitConstructorCall(this, data)
 
     class ConstructorTypeArguments(internal val irConstructorCall: IrConstructorCall) : AbstractList<IrType?>() {
         override val size: Int

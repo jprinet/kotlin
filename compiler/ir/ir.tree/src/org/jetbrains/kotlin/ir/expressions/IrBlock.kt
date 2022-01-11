@@ -26,6 +26,7 @@ import org.jetbrains.kotlin.ir.util.fileOrNull
 import org.jetbrains.kotlin.ir.util.transformInPlace
 import org.jetbrains.kotlin.ir.visitors.IrElementTransformer
 import org.jetbrains.kotlin.ir.visitors.IrElementVisitor
+import org.jetbrains.kotlin.ir.visitors.IrThinVisitor
 
 abstract class IrContainerExpression : IrExpression(), IrStatementContainer {
     abstract val origin: IrStatementOrigin?
@@ -37,6 +38,10 @@ abstract class IrContainerExpression : IrExpression(), IrStatementContainer {
         statements.forEach { it.accept(visitor, data) }
     }
 
+    override fun <D> acceptChildren(visitor: IrThinVisitor<Unit, D>, data: D) {
+        statements.forEach { it.accept(visitor, data) }
+    }
+
     override fun <D> transformChildren(transformer: IrElementTransformer<D>, data: D) {
         statements.transformInPlace(transformer, data)
     }
@@ -45,11 +50,23 @@ abstract class IrContainerExpression : IrExpression(), IrStatementContainer {
 abstract class IrBlock : IrContainerExpression() {
     override val isTransparentScope: Boolean
         get() = false
+
+    override fun <R, D> accept(visitor: IrElementVisitor<R, D>, data: D): R =
+        visitor.visitBlock(this, data)
+
+    override fun <R, D> accept(visitor: IrThinVisitor<R, D>, data: D): R =
+        visitor.visitBlock(this, data)
 }
 
 abstract class IrComposite : IrContainerExpression() {
     override val isTransparentScope: Boolean
         get() = true
+
+    override fun <R, D> accept(visitor: IrElementVisitor<R, D>, data: D): R =
+        visitor.visitComposite(this, data)
+
+    override fun <R, D> accept(visitor: IrThinVisitor<R, D>, data: D): R =
+        visitor.visitComposite(this, data)
 }
 
 abstract class IrReturnableBlock : IrBlock(), IrSymbolOwner, IrReturnTarget {

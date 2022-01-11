@@ -20,6 +20,8 @@ import org.jetbrains.kotlin.ir.IrElement
 import org.jetbrains.kotlin.ir.IrElementBase
 import org.jetbrains.kotlin.ir.types.IrType
 import org.jetbrains.kotlin.ir.visitors.IrElementTransformer
+import org.jetbrains.kotlin.ir.visitors.IrElementVisitor
+import org.jetbrains.kotlin.ir.visitors.IrThinVisitor
 
 interface IrVarargElement : IrElement
 
@@ -29,6 +31,20 @@ abstract class IrVararg : IrExpression() {
     abstract val elements: List<IrVarargElement>
 
     abstract fun putElement(i: Int, element: IrVarargElement)
+
+    override fun <R, D> accept(visitor: IrElementVisitor<R, D>, data: D): R =
+        visitor.visitVararg(this, data)
+
+    override fun <R, D> accept(visitor: IrThinVisitor<R, D>, data: D): R =
+        visitor.visitVararg(this, data)
+
+    override fun <D> acceptChildren(visitor: IrElementVisitor<Unit, D>, data: D) {
+        elements.forEach { it.accept(visitor, data) }
+    }
+
+    override fun <D> acceptChildren(visitor: IrThinVisitor<Unit, D>, data: D) {
+        elements.forEach { it.accept(visitor, data) }
+    }
 }
 
 abstract class IrSpreadElement : IrElementBase(), IrVarargElement {
@@ -36,4 +52,18 @@ abstract class IrSpreadElement : IrElementBase(), IrVarargElement {
 
     override fun <D> transform(transformer: IrElementTransformer<D>, data: D): IrElement =
         accept(transformer, data) as IrSpreadElement
+
+    override fun <R, D> accept(visitor: IrElementVisitor<R, D>, data: D): R =
+        visitor.visitSpreadElement(this, data)
+
+    override fun <R, D> accept(visitor: IrThinVisitor<R, D>, data: D): R =
+        visitor.visitSpreadElement(this, data)
+
+    override fun <D> acceptChildren(visitor: IrElementVisitor<Unit, D>, data: D) {
+        expression.accept(visitor, data)
+    }
+
+    override fun <D> acceptChildren(visitor: IrThinVisitor<Unit, D>, data: D) {
+        expression.accept(visitor, data)
+    }
 }

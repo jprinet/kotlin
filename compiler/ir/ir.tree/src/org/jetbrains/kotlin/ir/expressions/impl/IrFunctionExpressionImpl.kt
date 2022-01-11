@@ -10,7 +10,6 @@ import org.jetbrains.kotlin.ir.expressions.IrFunctionExpression
 import org.jetbrains.kotlin.ir.expressions.IrStatementOrigin
 import org.jetbrains.kotlin.ir.types.IrType
 import org.jetbrains.kotlin.ir.visitors.IrElementTransformer
-import org.jetbrains.kotlin.ir.visitors.IrElementVisitor
 
 class IrFunctionExpressionImpl(
     override val startOffset: Int,
@@ -19,14 +18,6 @@ class IrFunctionExpressionImpl(
     override var function: IrSimpleFunction,
     override val origin: IrStatementOrigin
 ) : IrFunctionExpression() {
-    override fun <R, D> accept(visitor: IrElementVisitor<R, D>, data: D): R {
-        return visitor.visitFunctionExpression(this, data)
-    }
-
-    override fun <D> acceptChildren(visitor: IrElementVisitor<Unit, D>, data: D) {
-        function.accept(visitor, data)
-    }
-
     override fun <D> transformChildren(transformer: IrElementTransformer<D>, data: D) {
         function = function.transform(transformer, data) as IrSimpleFunction
     }

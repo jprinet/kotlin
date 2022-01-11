@@ -26,6 +26,7 @@ import org.jetbrains.kotlin.ir.types.IrType
 import org.jetbrains.kotlin.ir.util.transformIfNeeded
 import org.jetbrains.kotlin.ir.visitors.IrElementTransformer
 import org.jetbrains.kotlin.ir.visitors.IrElementVisitor
+import org.jetbrains.kotlin.ir.visitors.IrThinVisitor
 
 abstract class IrFunction :
     IrDeclarationBase(),
@@ -37,7 +38,9 @@ abstract class IrFunction :
     abstract override val descriptor: FunctionDescriptor
     abstract override val symbol: IrFunctionSymbol
 
-    abstract val isInline: Boolean // NB: there's an inline constructor for Array and each primitive array class
+    // NB: there's an inline constructor for Array and each primitive array class
+    abstract val isInline: Boolean
+
     abstract val isExpect: Boolean
 
     abstract var returnType: IrType
@@ -53,7 +56,19 @@ abstract class IrFunction :
 
     abstract var body: IrBody?
 
+    @Suppress("DuplicatedCode")
     override fun <D> acceptChildren(visitor: IrElementVisitor<Unit, D>, data: D) {
+        typeParameters.forEach { it.accept(visitor, data) }
+
+        dispatchReceiverParameter?.accept(visitor, data)
+        extensionReceiverParameter?.accept(visitor, data)
+        valueParameters.forEach { it.accept(visitor, data) }
+
+        body?.accept(visitor, data)
+    }
+
+    @Suppress("DuplicatedCode")
+    override fun <D> acceptChildren(visitor: IrThinVisitor<Unit, D>, data: D) {
         typeParameters.forEach { it.accept(visitor, data) }
 
         dispatchReceiverParameter?.accept(visitor, data)

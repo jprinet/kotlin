@@ -17,6 +17,8 @@
 package org.jetbrains.kotlin.ir.expressions
 
 import org.jetbrains.kotlin.ir.symbols.*
+import org.jetbrains.kotlin.ir.visitors.IrElementVisitor
+import org.jetbrains.kotlin.ir.visitors.IrThinVisitor
 import org.jetbrains.kotlin.name.Name
 
 abstract class IrCallableReference<S : IrSymbol>(typeArgumentsCount: Int) : IrMemberAccessExpression<S>(typeArgumentsCount) {
@@ -25,6 +27,12 @@ abstract class IrCallableReference<S : IrSymbol>(typeArgumentsCount: Int) : IrMe
 
 abstract class IrFunctionReference(typeArgumentsCount: Int) : IrCallableReference<IrFunctionSymbol>(typeArgumentsCount) {
     abstract val reflectionTarget: IrFunctionSymbol?
+
+    override fun <R, D> accept(visitor: IrElementVisitor<R, D>, data: D): R =
+        visitor.visitFunctionReference(this, data)
+
+    override fun <R, D> accept(visitor: IrThinVisitor<R, D>, data: D): R =
+        visitor.visitFunctionReference(this, data)
 }
 
 val IrFunctionReference.isWithReflection: Boolean
@@ -40,6 +48,12 @@ abstract class IrPropertyReference(typeArgumentsCount: Int) : IrCallableReferenc
 
     override val valueArgumentsCount: Int
         get() = 0
+
+    override fun <R, D> accept(visitor: IrElementVisitor<R, D>, data: D): R =
+        visitor.visitPropertyReference(this, data)
+
+    override fun <R, D> accept(visitor: IrThinVisitor<R, D>, data: D): R =
+        visitor.visitPropertyReference(this, data)
 }
 
 abstract class IrLocalDelegatedPropertyReference : IrCallableReference<IrLocalDelegatedPropertySymbol>(0) {
@@ -49,4 +63,10 @@ abstract class IrLocalDelegatedPropertyReference : IrCallableReference<IrLocalDe
 
     override val valueArgumentsCount: Int
         get() = 0
+
+    override fun <R, D> accept(visitor: IrElementVisitor<R, D>, data: D): R =
+        visitor.visitLocalDelegatedPropertyReference(this, data)
+
+    override fun <R, D> accept(visitor: IrThinVisitor<R, D>, data: D): R =
+        visitor.visitLocalDelegatedPropertyReference(this, data)
 }

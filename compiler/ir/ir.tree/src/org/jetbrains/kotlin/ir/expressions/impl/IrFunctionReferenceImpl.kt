@@ -24,6 +24,7 @@ import org.jetbrains.kotlin.ir.symbols.IrFunctionSymbol
 import org.jetbrains.kotlin.ir.types.IrType
 import org.jetbrains.kotlin.ir.visitors.IrElementTransformer
 import org.jetbrains.kotlin.ir.visitors.IrElementVisitor
+import org.jetbrains.kotlin.ir.visitors.IrThinVisitor
 import org.jetbrains.kotlin.name.Name
 
 class IrFunctionReferenceImpl(
@@ -59,10 +60,12 @@ class IrFunctionReferenceImpl(
         argumentsByParameterIndex[index] = null
     }
 
-    override fun <R, D> accept(visitor: IrElementVisitor<R, D>, data: D): R =
-        visitor.visitFunctionReference(this, data)
-
     override fun <D> acceptChildren(visitor: IrElementVisitor<Unit, D>, data: D) {
+        super.acceptChildren(visitor, data)
+        argumentsByParameterIndex.forEach { it?.accept(visitor, data) }
+    }
+
+    override fun <D> acceptChildren(visitor: IrThinVisitor<Unit, D>, data: D) {
         super.acceptChildren(visitor, data)
         argumentsByParameterIndex.forEach { it?.accept(visitor, data) }
     }

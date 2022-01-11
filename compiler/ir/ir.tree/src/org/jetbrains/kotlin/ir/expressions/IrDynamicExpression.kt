@@ -5,6 +5,9 @@
 
 package org.jetbrains.kotlin.ir.expressions
 
+import org.jetbrains.kotlin.ir.visitors.IrElementVisitor
+import org.jetbrains.kotlin.ir.visitors.IrThinVisitor
+
 abstract class IrDynamicExpression : IrExpression()
 
 abstract class IrDynamicOperatorExpression : IrDynamicExpression() {
@@ -13,6 +16,26 @@ abstract class IrDynamicOperatorExpression : IrDynamicExpression() {
     abstract var receiver: IrExpression
 
     abstract val arguments: MutableList<IrExpression>
+
+    override fun <R, D> accept(visitor: IrElementVisitor<R, D>, data: D): R =
+        visitor.visitDynamicOperatorExpression(this, data)
+
+    override fun <R, D> accept(visitor: IrThinVisitor<R, D>, data: D): R =
+        visitor.visitDynamicOperatorExpression(this, data)
+
+    override fun <D> acceptChildren(visitor: IrElementVisitor<Unit, D>, data: D) {
+        receiver.accept(visitor, data)
+        for (valueArgument in arguments) {
+            valueArgument.accept(visitor, data)
+        }
+    }
+
+    override fun <D> acceptChildren(visitor: IrThinVisitor<Unit, D>, data: D) {
+        receiver.accept(visitor, data)
+        for (valueArgument in arguments) {
+            valueArgument.accept(visitor, data)
+        }
+    }
 }
 
 var IrDynamicOperatorExpression.left: IrExpression
@@ -34,6 +57,20 @@ abstract class IrDynamicMemberExpression : IrDynamicExpression() {
     abstract val memberName: String
 
     abstract var receiver: IrExpression
+
+    override fun <R, D> accept(visitor: IrElementVisitor<R, D>, data: D): R =
+        visitor.visitDynamicMemberExpression(this, data)
+
+    override fun <R, D> accept(visitor: IrThinVisitor<R, D>, data: D): R =
+        visitor.visitDynamicMemberExpression(this, data)
+
+    override fun <D> acceptChildren(visitor: IrElementVisitor<Unit, D>, data: D) {
+        receiver.accept(visitor, data)
+    }
+
+    override fun <D> acceptChildren(visitor: IrThinVisitor<Unit, D>, data: D) {
+        receiver.accept(visitor, data)
+    }
 }
 
 enum class IrDynamicOperator(val image: String, val isAssignmentOperator: Boolean = false) {

@@ -20,6 +20,8 @@ import org.jetbrains.kotlin.ir.symbols.IrClassSymbol
 import org.jetbrains.kotlin.ir.symbols.IrEnumEntrySymbol
 import org.jetbrains.kotlin.ir.symbols.IrFunctionSymbol
 import org.jetbrains.kotlin.ir.symbols.IrSymbol
+import org.jetbrains.kotlin.ir.visitors.IrElementVisitor
+import org.jetbrains.kotlin.ir.visitors.IrThinVisitor
 
 abstract class IrDeclarationReference : IrExpression() {
     abstract val symbol: IrSymbol
@@ -29,10 +31,22 @@ abstract class IrGetSingletonValue : IrDeclarationReference()
 
 abstract class IrGetObjectValue : IrGetSingletonValue() {
     abstract override val symbol: IrClassSymbol
+
+    override fun <R, D> accept(visitor: IrElementVisitor<R, D>, data: D): R =
+        visitor.visitGetObjectValue(this, data)
+
+    override fun <R, D> accept(visitor: IrThinVisitor<R, D>, data: D): R =
+        visitor.visitGetObjectValue(this, data)
 }
 
 abstract class IrGetEnumValue : IrGetSingletonValue() {
     abstract override val symbol: IrEnumEntrySymbol
+
+    override fun <R, D> accept(visitor: IrElementVisitor<R, D>, data: D): R =
+        visitor.visitGetEnumValue(this, data)
+
+    override fun <R, D> accept(visitor: IrThinVisitor<R, D>, data: D): R =
+        visitor.visitGetEnumValue(this, data)
 }
 
 /**
@@ -43,4 +57,10 @@ abstract class IrGetEnumValue : IrGetSingletonValue() {
  */
 abstract class IrRawFunctionReference : IrDeclarationReference() {
     abstract override val symbol: IrFunctionSymbol
+
+    override fun <R, D> accept(visitor: IrElementVisitor<R, D>, data: D): R =
+        visitor.visitRawFunctionReference(this, data)
+
+    override fun <R, D> accept(visitor: IrThinVisitor<R, D>, data: D): R =
+        visitor.visitRawFunctionReference(this, data)
 }

@@ -19,6 +19,7 @@ package org.jetbrains.kotlin.ir.expressions
 import org.jetbrains.kotlin.ir.IrElementBase
 import org.jetbrains.kotlin.ir.visitors.IrElementTransformer
 import org.jetbrains.kotlin.ir.visitors.IrElementVisitor
+import org.jetbrains.kotlin.ir.visitors.IrThinVisitor
 
 abstract class IrWhen : IrExpression() {
     abstract val origin: IrStatementOrigin?
@@ -28,7 +29,14 @@ abstract class IrWhen : IrExpression() {
     override fun <R, D> accept(visitor: IrElementVisitor<R, D>, data: D): R =
         visitor.visitWhen(this, data)
 
+    override fun <R, D> accept(visitor: IrThinVisitor<R, D>, data: D): R =
+        visitor.visitWhen(this, data)
+
     override fun <D> acceptChildren(visitor: IrElementVisitor<Unit, D>, data: D) {
+        branches.forEach { it.accept(visitor, data) }
+    }
+
+    override fun <D> acceptChildren(visitor: IrThinVisitor<Unit, D>, data: D) {
         branches.forEach { it.accept(visitor, data) }
     }
 
@@ -45,7 +53,18 @@ abstract class IrBranch : IrElementBase() {
 
     abstract override fun <D> transform(transformer: IrElementTransformer<D>, data: D): IrBranch
 
+    override fun <R, D> accept(visitor: IrElementVisitor<R, D>, data: D): R =
+        visitor.visitBranch(this, data)
+
+    override fun <R, D> accept(visitor: IrThinVisitor<R, D>, data: D): R =
+        visitor.visitBranch(this, data)
+
     override fun <D> acceptChildren(visitor: IrElementVisitor<Unit, D>, data: D) {
+        condition.accept(visitor, data)
+        result.accept(visitor, data)
+    }
+
+    override fun <D> acceptChildren(visitor: IrThinVisitor<Unit, D>, data: D) {
         condition.accept(visitor, data)
         result.accept(visitor, data)
     }
@@ -56,4 +75,10 @@ abstract class IrBranch : IrElementBase() {
     }
 }
 
-abstract class IrElseBranch : IrBranch()
+abstract class IrElseBranch : IrBranch() {
+    override fun <R, D> accept(visitor: IrElementVisitor<R, D>, data: D): R =
+        visitor.visitElseBranch(this, data)
+
+    override fun <R, D> accept(visitor: IrThinVisitor<R, D>, data: D): R =
+        visitor.visitElseBranch(this, data)
+}

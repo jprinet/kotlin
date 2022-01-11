@@ -19,7 +19,6 @@ package org.jetbrains.kotlin.ir.expressions.impl
 import org.jetbrains.kotlin.ir.expressions.*
 import org.jetbrains.kotlin.ir.types.IrType
 import org.jetbrains.kotlin.ir.visitors.IrElementTransformer
-import org.jetbrains.kotlin.ir.visitors.IrElementVisitor
 
 class IrWhenImpl(
     override val startOffset: Int,
@@ -49,9 +48,6 @@ open class IrBranchImpl(
     constructor(condition: IrExpression, result: IrExpression) :
             this(condition.startOffset, result.endOffset, condition, result)
 
-    override fun <R, D> accept(visitor: IrElementVisitor<R, D>, data: D): R =
-        visitor.visitBranch(this, data)
-
     override fun <D> transform(transformer: IrElementTransformer<D>, data: D): IrBranch =
         transformer.visitBranch(this, data)
 }
@@ -64,9 +60,6 @@ class IrElseBranchImpl(
 ) : IrElseBranch() {
     constructor(condition: IrExpression, result: IrExpression) :
             this(condition.startOffset, result.endOffset, condition, result)
-
-    override fun <R, D> accept(visitor: IrElementVisitor<R, D>, data: D): R =
-        visitor.visitElseBranch(this, data)
 
     override fun <D> transform(transformer: IrElementTransformer<D>, data: D): IrElseBranch =
         transformer.visitElseBranch(this, data)
