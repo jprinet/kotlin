@@ -14,6 +14,8 @@ import org.jetbrains.kotlin.ir.builders.irSetField
 import org.jetbrains.kotlin.ir.declarations.IrField
 import org.jetbrains.kotlin.ir.declarations.IrFile
 import org.jetbrains.kotlin.ir.expressions.IrBlockBody
+import org.jetbrains.kotlin.ir.expressions.IrConst
+import org.jetbrains.kotlin.ir.expressions.IrConstKind
 import org.jetbrains.kotlin.ir.expressions.IrExpression
 import org.jetbrains.kotlin.ir.visitors.IrElementVisitorVoid
 import org.jetbrains.kotlin.ir.visitors.acceptChildrenVoid
@@ -45,6 +47,9 @@ class FieldInitializersLowering(val context: WasmBackendContext) : FileLoweringP
 
                 if (!declaration.isStatic) return
                 val initValue: IrExpression = declaration.initializer?.expression ?: return
+
+                val constExpression = initValue as? IrConst<*> ?: return
+                if (constExpression.kind !is IrConstKind.String && constExpression.kind !is IrConstKind.Null) return
 
                 startFunctionBody.statements.add(
                     builder.at(initValue).irSetField(null, declaration, initValue)
