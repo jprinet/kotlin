@@ -17,20 +17,36 @@ import java.util.*
 
 internal fun reportingSettings(rootProject: Project): ReportingSettings {
     val properties = PropertiesProvider(rootProject)
+    val buildReportType =
+        properties.buildReportOutputs.mapNotNull { BuildReportType.values().firstOrNull { brt -> brt.name == it.toUpperCase() } }
     val buildReportMode =
         when {
-            !properties.buildReportEnabled -> BuildReportMode.NONE
-            properties.buildReportVerbose -> BuildReportMode.VERBOSE
-            else -> BuildReportMode.SIMPLE
+            buildReportType.isEmpty() -> BuildReportMode.NONE
+            else -> BuildReportMode.VERBOSE
         }
+    val fileReportSettings = if (buildReportType.contains(BuildReportType.FILE)) {
+        val buildReportDir = properties.buildReportFileOutputDir ?: rootProject.buildDir.resolve("reports/kotlin-build")
+        val includeMetricsInReport = properties.buildReportMetrics || buildReportMode == BuildReportMode.VERBOSE
+        FileReportSettings(buildReportDir = buildReportDir, includeMetricsInReport = includeMetricsInReport)
+    } else {
+        null
+    }
+
+    val httpReportSettings = if (buildReportType.contains(BuildReportType.HTTP)) {
+        val url = properties.buildReportHttpUrl ?: throw IllegalStateException("Can't configure http report without url property")
+        val password = properties.buildReportHttpPassword
+        val user = properties.buildReportHttpUser
+        HttpReportSettings(url, password, user)
+    } else {
+        null
+    }
     val metricsOutputFile = properties.singleBuildMetricsFile
-    val buildReportDir = properties.buildReportDir ?: rootProject.buildDir.resolve("reports/kotlin-build")
-    val includeMetricsInReport = properties.buildReportMetrics || buildReportMode == BuildReportMode.VERBOSE
     return ReportingSettings(
         metricsOutputFile = metricsOutputFile,
-        buildReportDir = buildReportDir,
-        reportMetrics = metricsOutputFile != null || includeMetricsInReport,
-        includeMetricsInReport = includeMetricsInReport,
-        buildReportMode = buildReportMode
+        buildReportMode = buildReportMode,
+        fileReportSettings = fileReportSettings,
+        httpReportSettings = httpReportSettings
     )
 }
+
+

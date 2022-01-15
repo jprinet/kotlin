@@ -25,6 +25,10 @@ class BuildPerformanceMetrics : Serializable {
         myBuildMetrics[metric] = myBuildMetrics.getOrDefault(metric, 0) + value
     }
 
+    fun count(metric: BuildPerformanceMetric, count: Long = 1) {
+        myBuildMetrics[metric] = myBuildMetrics.getOrDefault(metric, 0) + count
+    }
+
     fun asMap(): Map<BuildPerformanceMetric, Long> = myBuildMetrics
 
 }

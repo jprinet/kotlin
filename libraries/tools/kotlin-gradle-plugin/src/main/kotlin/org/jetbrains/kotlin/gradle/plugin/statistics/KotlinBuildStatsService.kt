@@ -13,6 +13,7 @@ import org.gradle.api.logging.Logging
 import org.gradle.initialization.BuildRequestMetaData
 import org.gradle.invocation.DefaultGradle
 import org.jetbrains.kotlin.gradle.plugin.statistics.KotlinBuildStatHandler.Companion.runSafe
+import org.jetbrains.kotlin.gradle.report.reportingSettings
 import org.jetbrains.kotlin.gradle.utils.isConfigurationCacheAvailable
 import org.jetbrains.kotlin.statistics.BuildSessionLogger
 import org.jetbrains.kotlin.statistics.BuildSessionLogger.Companion.STATISTICS_FOLDER_NAME
@@ -88,6 +89,7 @@ internal abstract class KotlinBuildStatsService internal constructor() : BuildAd
 
             return runSafe("${KotlinBuildStatsService::class.java}.getOrCreateInstance") {
                 val gradle = project.gradle
+                val rootProject = project.gradle.rootProject
                 statisticsIsEnabled = statisticsIsEnabled ?: checkStatisticsEnabled(gradle)
                 if (statisticsIsEnabled != true) {
                     null
