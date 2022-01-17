@@ -231,7 +231,6 @@ enum class LanguageFeature(
     ForbidUsingExtensionPropertyTypeParameterInDelegate(KOTLIN_1_7, kind = BUG_FIX),
     IgnoreNullabilityForErasedValueParameters(KOTLIN_1_7, kind = BUG_FIX),
     ProperTypeInferenceConstraintsProcessing(KOTLIN_1_7, kind = BUG_FIX),
-    ProhibitNonExhaustiveIfInRhsOfElvis(KOTLIN_1_7, kind = BUG_FIX), // KT-44705
     ForbidExposingTypesInPrimaryConstructorProperties(KOTLIN_1_7, kind = BUG_FIX),
     ProhibitAccessToEnumCompanionMembersInEnumConstructorCall(KOTLIN_1_7, kind = BUG_FIX),
     PartiallySpecifiedTypeArguments(KOTLIN_1_7),
@@ -255,6 +254,7 @@ enum class LanguageFeature(
     ForbidSuperDelegationToAbstractFakeOverride(KOTLIN_1_8), // KT-49017
     ForbidSuperDelegationToAbstractAnyMethod(KOTLIN_1_8), // KT-38078
     StopPropagatingDeprecationThroughOverrides(KOTLIN_1_8), // KT-47902
+    ProhibitNonExhaustiveIfInRhsOfElvis(KOTLIN_1_8, kind = BUG_FIX), // KT-44705
 
     // 1.9
 
