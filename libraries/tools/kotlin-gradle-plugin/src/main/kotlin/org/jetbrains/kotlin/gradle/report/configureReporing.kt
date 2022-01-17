@@ -11,7 +11,7 @@ import org.jetbrains.kotlin.gradle.plugin.PropertiesProvider
 internal fun reportingSettings(rootProject: Project): ReportingSettings {
     val properties = PropertiesProvider(rootProject)
     val buildReportOutputTypes =
-        properties.buildReportOutputs.mapNotNull { BuildReportType.values().firstOrNull { brt -> brt.name == it.toUpperCase() } }
+        properties.buildReportOutputs.mapNotNull { BuildReportType.values().firstOrNull { brt -> brt.name == it.trim().toUpperCase() } }
     val buildReportMode =
         when {
             buildReportOutputTypes.isEmpty() -> BuildReportMode.NONE
