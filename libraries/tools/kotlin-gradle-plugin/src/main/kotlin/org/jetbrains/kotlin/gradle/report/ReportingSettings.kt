@@ -16,7 +16,7 @@ data class ReportingSettings(
     val httpReportSettings: HttpReportSettings? = null
 ) : Serializable {
     companion object {
-        const val serialVersionUID: Long = 0
+        const val serialVersionUID: Long = 1
     }
 }
 
@@ -24,10 +24,18 @@ data class FileReportSettings(
     val metricsOutputFile: File? = null,
     val buildReportDir: File,
     val includeMetricsInReport: Boolean = false,
-)
+) : Serializable {
+    companion object {
+        const val serialVersionUID: Long = 0
+    }
+}
 
 data class HttpReportSettings(
     val url: String,
     val password: String?,
     val user: String?
-)
+) : Serializable {
+    companion object {
+        const val serialVersionUID: Long = 0
+    }
+}
